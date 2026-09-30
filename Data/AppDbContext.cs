@@ -12,13 +12,19 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<Account> Accounts { get; set; }
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Account>()
             .HasOne(account => account.User)
             .WithOne()
             .HasForeignKey<Account>(account => account.UserId);
 
+        modelBuilder.Entity<Transaction>()
+            .HasOne(transaction => transaction.Account)
+            .WithMany()
+            .HasForeignKey(transaction => transaction.AccountId);
+
         base.OnModelCreating(modelBuilder);
     }
+    public DbSet<Transaction> Transactions { get; set; }
 }
