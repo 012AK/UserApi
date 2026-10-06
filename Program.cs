@@ -70,6 +70,10 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<IAssetService, AssetService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IPortfolioService, PortfolioService>();
 
 var app = builder.Build();
 

@@ -18,21 +18,36 @@ public class ExceptionMiddleware
         {
             await _next(context);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            await HandleExceptionAsync(context);
+            await HandleExceptionAsync(context, ex);
         }
     }
 
-    private static async Task HandleExceptionAsync(HttpContext context)
+    private static async Task HandleExceptionAsync(
+        HttpContext context,
+        Exception exception)
     {
-        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+        var statusCode = exception switch
+        {
+            ArgumentException => HttpStatusCode.BadRequest,
+            InvalidOperationException => HttpStatusCode.BadRequest,
+            KeyNotFoundException => HttpStatusCode.NotFound,
+            UnauthorizedAccessException => HttpStatusCode.Unauthorized,
+            _ => HttpStatusCode.InternalServerError
+        };
+
+        context.Response.StatusCode = (int)statusCode;
         context.Response.ContentType = "application/json";
+
+        var message = statusCode == HttpStatusCode.InternalServerError
+            ? "An unexpected error occurred."
+            : exception.Message;
 
         var response = new
         {
-            status = 500,
-            message = "An unexpected error occurred."
+            status = (int)statusCode,
+            message
         };
 
         await context.Response.WriteAsync(

@@ -55,38 +55,4 @@ public class AccountsController : ControllerBase
 
         return int.Parse(userId);
     }
-
-    [HttpPost("deposit")]
-    public async Task<IActionResult> Deposit(BalanceOperationDto dto)
-    {
-        var userId = GetUserId();
-
-        var account = await _accountService
-            .DepositAsync(userId, dto.Amount);
-
-        if (account == null)
-            return NotFound(new
-            {
-                message = "Account not found."
-            });
-
-        return Ok(account);
-    }
-
-    [HttpPost("withdraw")]
-    public async Task<IActionResult> Withdraw(BalanceOperationDto dto)
-    {
-        var userId = GetUserId();
-
-        var account = await _accountService
-            .WithdrawAsync(userId, dto.Amount);
-
-        if (account == null)
-            return NotFound(new
-            {
-                message = "Account not found."
-            });
-
-        return Ok(account);
-    }
 }
