@@ -14,5 +14,11 @@ public interface IOrderService
         int assetId,
         int quantity);
 
-    Task<List<Order>> GetMyOrdersAsync(int userId);
+    Task<object> GetMyOrdersAsync(
+        int userId,
+        int page,
+        int pageSize,
+        string? type,
+        string? sortBy,
+        string? sortOrder);
 }

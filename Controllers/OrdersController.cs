@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using UserApi.DTOs;
 using UserApi.Services;
 
 namespace UserApi.Controllers;
@@ -19,41 +20,50 @@ public class OrdersController : ControllerBase
 
     [HttpPost("buy")]
     public async Task<IActionResult> Buy(
-        int assetId,
-        int quantity)
+        [FromBody] OrderRequestDto dto)
     {
         var userId = GetUserId();
 
         var order = await _orderService.BuyAsync(
             userId,
-            assetId,
-            quantity);
+            dto.AssetId,
+            dto.Quantity);
 
         return Ok(order);
     }
 
     [HttpPost("sell")]
     public async Task<IActionResult> Sell(
-        int assetId,
-        int quantity)
+        [FromBody] OrderRequestDto dto)
     {
         var userId = GetUserId();
 
         var order = await _orderService.SellAsync(
             userId,
-            assetId,
-            quantity);
+            dto.AssetId,
+            dto.Quantity);
 
         return Ok(order);
     }
 
     [HttpGet("my")]
-    public async Task<IActionResult> GetMyOrders()
+    public async Task<IActionResult> GetMyOrders(
+        int page = 1,
+        int pageSize = 10,
+        string? type = null,
+        string? sortBy = null,
+        string? sortOrder = "desc")
     {
         var userId = GetUserId();
 
         var orders = await _orderService
-            .GetMyOrdersAsync(userId);
+            .GetMyOrdersAsync(
+                userId,
+                page,
+                pageSize,
+                type,
+                sortBy,
+                sortOrder);
 
         return Ok(orders);
     }

@@ -4,6 +4,6 @@ namespace UserApi.DTOs;
 
 public class BalanceOperationDto
 {
-    [Range(0.01, 1000000000)]
+    [Range(0.01, double.MaxValue)]
     public decimal Amount { get; set; }
 }

@@ -118,12 +118,77 @@ public class OrderService : IOrderService
         return order;
     }
 
-    public async Task<List<Order>> GetMyOrdersAsync(int userId)
+    public async Task<object> GetMyOrdersAsync(
+        int userId,
+        int page,
+        int pageSize,
+        string? type,
+        string? sortBy,
+        string? sortOrder)
     {
-        return await _context.Orders
+        if (page < 1)
+            page = 1;
+
+        if (pageSize < 1)
+            pageSize = 10;
+
+        if (pageSize > 100)
+            pageSize = 100;
+
+        var query = _context.Orders
             .Include(o => o.Asset)
-            .Where(o => o.UserId == userId)
-            .OrderByDescending(o => o.CreatedAt)
+            .Where(o => o.UserId == userId);
+
+        // Filter by BUY / SELL
+        if (!string.IsNullOrWhiteSpace(type))
+        {
+            type = type.ToUpper();
+
+            if (type != "BUY" && type != "SELL")
+                throw new ArgumentException(
+                    "Type must be BUY or SELL");
+
+            query = query.Where(o => o.Type == type);
+        }
+
+        // Sorting
+        sortBy = sortBy?.ToLower();
+        sortOrder = sortOrder?.ToLower();
+
+        if (sortBy == "price")
+        {
+            query = sortOrder == "asc"
+                ? query.OrderBy(o => o.Price)
+                : query.OrderByDescending(o => o.Price);
+        }
+        else if (sortBy == "quantity")
+        {
+            query = sortOrder == "asc"
+                ? query.OrderBy(o => o.Quantity)
+                : query.OrderByDescending(o => o.Quantity);
+        }
+        else
+        {
+            query = sortOrder == "asc"
+                ? query.OrderBy(o => o.CreatedAt)
+                : query.OrderByDescending(o => o.CreatedAt);
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var orders = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
+
+        return new
+        {
+            page,
+            pageSize,
+            totalCount,
+            totalPages = (int)Math.Ceiling(
+                totalCount / (double)pageSize),
+            items = orders
+        };
     }
 }
